@@ -1,7 +1,9 @@
 'use strict';
 
 const PORT = 8080;
-const HOST = '0.0.0.0';
+const HOST = "0.0.0.0";
+
+const ETCDENDPOINT = `${process.env.MACHINEID}.ttt.roles.addresses.services.ruhmesmeile.local:2379`;
 
 const PROJECTKEY = process.env.TYPO3_PROJECTKEY;
 
@@ -16,8 +18,13 @@ const express = require('express');
 const Prometheus = require('prom-client')
 
 const Etcd = require('node-etcd');
-const etcd = new Etcd("127.0.0.1:2379");
-
+const fs = require('fs');
+var options = {
+    ca:   fs.readFileSync('/etc/ssl/etcd/ca.pem'),
+    cert: fs.readFileSync('/etc/ssl/etcd/calculonc.pem'),
+    key:  fs.readFileSync('/etc/ssl/etcd/calculonc-key.pem')
+};
+const etcd = new Etcd(ETCDENDPOINT, options);
 const app = express();
 
 const typo3CurrentStatus = new Prometheus.Gauge({

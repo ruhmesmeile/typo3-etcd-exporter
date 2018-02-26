@@ -17,6 +17,10 @@ const STATUS = {
 
 // e.g. "typo3,mail,solr"
 const SERVICES = process.env.TYPO3_SERVICES.split(',');
+console.log('start');
+console.log(process.env.TYPO3_SERVICES);
+console.log(SERVICES);
+console.log('end');
 
 const express = require('express');
 const Prometheus = require('prom-client')
@@ -37,6 +41,20 @@ const typo3CurrentStatus = new Prometheus.Gauge({
   labelNames: ['service']
 });
 
+var getStatusName = function getStatusName (name) {
+  var retVal;
+
+  if (name.indexOf('stopped') > -1) {
+    retVal = 'stopped';
+  } else if (name.indexOf('installing') > -1) {
+    retVal = 'installing';
+  } else {
+    retVal = name;
+  }
+
+  return retVal;
+};
+
 var watcher;
 var watchers = [];
 
@@ -48,7 +66,7 @@ app.get('/metrics', (req, res) => {
 SERVICES.forEach(function (serviceName) {
   var handleEtcdResult = function handleEtcdResult (err, currentStatus) {
     err ? console.log(err) : etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/${serviceName}/${currentStatus.node.value}`, function (err, timestamp) {
-      err ? console.log(err) : typo3CurrentStatus.labels(serviceName).set(STATUS[currentStatus.node.value], timestamp.node.value*1000);
+      err ? console.log(err) : typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)], timestamp.node.value*1000);
     });
   };
 

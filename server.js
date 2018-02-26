@@ -46,9 +46,9 @@ typo3StatusWatcher.on("change", function (value) {
   typo3CurrentStatus.labels('typo3').set(STATUS[value], timestamp*1000);
 });
 
-status = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`);
-timestamp = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${status}`);
-typo3CurrentStatus.labels('typo3').set(STATUS[value], timestamp*1000);
+value = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`);
+timestamp = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${value}`);
+typo3CurrentStatus.labels('typo3').set(STATUS[valu], timestamp*1000);
 
 app.listen(PORT, HOST);
 console.log(`Metrics running on http://${HOST}:${PORT}/metrics`);

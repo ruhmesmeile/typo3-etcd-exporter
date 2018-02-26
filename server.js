@@ -6,6 +6,8 @@ const HOST = "0.0.0.0";
 const ETCDENDPOINT = `https://${process.env.MACHINEID}.etcd.services.ruhmesmeile.local:2379`;
 
 const PROJECTKEY = process.env.TYPO3_PROJECTKEY;
+const STAGE = process.env.TYPO3_STAGE;
+const SERVICES = process.env.TYPO3_SERVICES.split(',');
 
 const STATUS = {
   'stopped': 0,
@@ -14,13 +16,6 @@ const STATUS = {
   'starting': 3,
   'started': 4
 }
-
-// e.g. "typo3,mail,solr"
-const SERVICES = process.env.TYPO3_SERVICES.split(',');
-console.log('start');
-console.log(process.env.TYPO3_SERVICES);
-console.log(SERVICES);
-console.log('end');
 
 const express = require('express');
 const Prometheus = require('prom-client')
@@ -65,16 +60,16 @@ app.get('/metrics', (req, res) => {
 
 SERVICES.forEach(function (serviceName) {
   var handleEtcdResult = function handleEtcdResult (err, currentStatus) {
-    err ? console.log(err) : etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/${serviceName}/${currentStatus.node.value}`, function (err, timestamp) {
+    err ? console.log(err) : etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/${currentStatus.node.value}`, function (err, timestamp) {
       err ? console.log(err) : typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)], timestamp.node.value*1000);
     });
   };
 
-  watcher = etcd.watcher(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/${serviceName}/current`);
+  watcher = etcd.watcher(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`);
   watcher.on("change", handleEtcdResult);
   watchers.push(watcher);
 
-  etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/${serviceName}/current`, handleEtcdResult);
+  etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, handleEtcdResult);
 });
 
 app.listen(PORT, HOST);

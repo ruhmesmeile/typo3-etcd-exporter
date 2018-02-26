@@ -10,8 +10,9 @@ const PROJECTKEY = process.env.TYPO3_PROJECTKEY;
 const STATUS = {
   'stopped': 0,
   'installing': 1,
-  'starting': 2,
-  'started': 3,
+  'installed': 2,
+  'starting': 3,
+  'started': 4
 }
 
 const express = require('express');

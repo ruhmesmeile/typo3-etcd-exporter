@@ -61,7 +61,8 @@ app.get('/metrics', (req, res) => {
 SERVICES.forEach(function (serviceName) {
   var handleEtcdResult = function handleEtcdResult (err, currentStatus) {
     err ? console.log(err) : etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/${getStatusName(currentStatus.node.value)}`, function (err, timestamp) {
-      err ? console.log(err) : typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)], timestamp.node.value*1000);
+      console.log("Timestamp: " + timestamp);
+      err ? console.log(err) : typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)]);
     });
   };
 

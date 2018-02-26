@@ -41,15 +41,18 @@ app.get('/metrics', (req, res) => {
 });
 
 const typo3StatusWatcher = etcd.watcher(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`);
-typo3StatusWatcher.on("change", function (value) {
-  var timestamp = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${value}`);
-  typo3CurrentStatus.labels('typo3').set(STATUS[value], timestamp*1000);
+typo3StatusWatcher.on("change", function (err, currentStatus) {
+  etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${currentStatus}`, function (err, value) {
+    typo3CurrentStatus.labels('typo3').set(STATUS[currentStatus], timestamp*1000);
+  });
 });
 
-value = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`);
-timestamp = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${value}`);
-console.log(`Debug: ${value}, ${timestamp}`);
-typo3CurrentStatus.labels('typo3').set(STATUS[value], timestamp*1000);
+etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`, function (err, currentStatus) {
+  etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${currentStatus}`, function (err, timestamp) {
+    console.log(`Debug: ${currentStatus.toString()}, ${timestamp.toString()}`);
+    typo3CurrentStatus.labels('typo3').set(STATUS[currentStatus], timestamp*1000);
+  });
+});
 
 app.listen(PORT, HOST);
 console.log(`Metrics running on http://${HOST}:${PORT}/metrics`);

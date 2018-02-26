@@ -3,7 +3,7 @@
 const PORT = 8080;
 const HOST = "0.0.0.0";
 
-const ETCDENDPOINT = `https://${process.env.MACHINEID}.ttt.roles.addresses.services.ruhmesmeile.local:2379`;
+const ETCDENDPOINT = `https://${process.env.MACHINEID}.etcd.services.ruhmesmeile.local:2379`;
 
 const PROJECTKEY = process.env.TYPO3_PROJECTKEY;
 

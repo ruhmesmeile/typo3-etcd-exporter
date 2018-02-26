@@ -3,7 +3,7 @@
 const PORT = 8080;
 const HOST = "0.0.0.0";
 
-const ETCDENDPOINT = `${process.env.MACHINEID}.ttt.roles.addresses.services.ruhmesmeile.local:2379`;
+const ETCDENDPOINT = `https://${process.env.MACHINEID}.ttt.roles.addresses.services.ruhmesmeile.local:2379`;
 
 const PROJECTKEY = process.env.TYPO3_PROJECTKEY;
 
@@ -33,6 +33,8 @@ const typo3CurrentStatus = new Prometheus.Gauge({
   labelNames: ['service']
 });
 
+var status, timestamp;
+
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', Prometheus.register.contentType);
   res.end(Prometheus.register.metrics());
@@ -43,6 +45,10 @@ typo3StatusWatcher.on("change", function (value) {
   var timestamp = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${value}`);
   typo3CurrentStatus.labels('typo3').set(STATUS[value], timestamp*1000);
 });
+
+status = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`);
+timestamp = etcd.getSync(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${status}`);
+typo3CurrentStatus.labels('typo3').set(STATUS[value], timestamp*1000);
 
 app.listen(PORT, HOST);
 console.log(`Metrics running on http://${HOST}:${PORT}/metrics`);

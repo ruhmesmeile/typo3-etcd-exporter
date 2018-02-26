@@ -42,13 +42,17 @@ app.get('/metrics', (req, res) => {
 
 const typo3StatusWatcher = etcd.watcher(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`);
 typo3StatusWatcher.on("change", function (err, currentStatus) {
+  if (err) console.log(err);
   etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${currentStatus}`, function (err, value) {
+    if (err) console.log(err);
     typo3CurrentStatus.labels('typo3').set(STATUS[currentStatus], timestamp*1000);
   });
 });
 
 etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/current`, function (err, currentStatus) {
+  if (err) console.log(err);
   etcd.get(`/ruhmesmeile/projects/typo3/review/${PROJECTKEY}/status/typo3/${currentStatus}`, function (err, timestamp) {
+    if (err) console.log(err);
     console.log(`Debug: ${currentStatus.toString()}, ${timestamp.toString()}`);
     typo3CurrentStatus.labels('typo3').set(STATUS[currentStatus], timestamp*1000);
   });

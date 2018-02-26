@@ -33,7 +33,7 @@ const typo3CurrentStatus = new Prometheus.Gauge({
   labelNames: ['service']
 });
 
-var status, timestamp;
+var value, timestamp;
 
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', Prometheus.register.contentType);

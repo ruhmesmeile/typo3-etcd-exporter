@@ -60,13 +60,13 @@ app.get('/metrics', (req, res) => {
 
 SERVICES.forEach(function (serviceName) {
   var handleEtcdResult = function handleEtcdResult (err, currentStatus) {
-    err ? console.log(err) : etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/${currentStatus.node.value}`, function (err, timestamp) {
+    err ? console.log(err) : etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/${getStatusName(currentStatus.node.value)}`, function (err, timestamp) {
       err ? console.log(err) : typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)], timestamp.node.value*1000);
     });
   };
 
   watcher = etcd.watcher(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`);
-  watcher.on("change", handleEtcdResult);
+  watcher.on("change", function (value) { handleEtcdResult(null, value); });
   watchers.push(watcher);
 
   etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, handleEtcdResult);

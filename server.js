@@ -8,6 +8,7 @@ const ETCDENDPOINT = `https://${process.env.MACHINEID}.etcd.services.ruhmesmeile
 const PROJECTKEY = process.env.TYPO3_PROJECTKEY;
 const STAGE = process.env.TYPO3_STAGE;
 const SERVICES = process.env.TYPO3_SERVICES.split(',');
+const REQUIRED_SERVICES = process.env.TYPO3_REQUIRED_SERVICES.split(',');
 
 const STATUS = {
   'stopped': 0,
@@ -56,10 +57,13 @@ var getStatusName = function getStatusName (name) {
 };
 
 const app = express();
-
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', Prometheus.register.contentType);
   res.end(Prometheus.register.metrics());
+});
+
+REQUIRED_SERVICES.forEach(function (serviceName) {
+  etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, 'stopped', console.log);
 });
 
 var watcher;

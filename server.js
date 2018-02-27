@@ -28,12 +28,17 @@ var options = {
     key:  fs.readFileSync('/etc/ssl/etcd/calculonc-key.pem')
 };
 const etcd = new Etcd(ETCDENDPOINT, options);
-const app = express();
 
 const typo3CurrentStatus = new Prometheus.Gauge({
   name: 'typo3_current_status',
   help: 'Current status of TYPO3 system',
   labelNames: ['service']
+});
+
+const typo3StatusCounter = new Prometheus.Counter({
+  name: 'typo3_current_status',
+  help: 'Current status of TYPO3 system',
+  labelNames: ['service','status']
 });
 
 var getStatusName = function getStatusName (name) {
@@ -50,17 +55,27 @@ var getStatusName = function getStatusName (name) {
   return retVal;
 };
 
-var watcher;
-var watchers = [];
+const app = express();
 
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', Prometheus.register.contentType);
   res.end(Prometheus.register.metrics());
 });
 
+var watcher;
+var watchers = [];
+
 SERVICES.forEach(function (serviceName) {
   var handleEtcdResult = function handleEtcdResult (err, currentStatus) {
-    err ? console.log(err) : typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)]);
+    if (err) {
+      console.log(err);
+    } else {
+      typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)]);
+
+      etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/${getStatusName(currentStatus.node.value)}`, function (err, timestamp) {
+        err ? console.log(err) : typo3StatusCounter.labels(serviceName, getStatusName(currentStatus.node.value)).inc(1, new Date(timestamp.node.value*1000));
+      })
+    }
   };
 
   watcher = etcd.watcher(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`);

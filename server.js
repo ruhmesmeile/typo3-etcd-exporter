@@ -63,7 +63,9 @@ app.get('/metrics', (req, res) => {
 });
 
 REQUIRED_SERVICES.forEach(function (serviceName) {
-  etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, 'stopped', function (err, res) {
+  etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, 'stopped', {
+    prevExist: false
+  }, function (err, res) {
     err ? console.log(err) : etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/stopped`, (new Date()/1000), function (err, res) {
       if (err) console.log(err);
     });

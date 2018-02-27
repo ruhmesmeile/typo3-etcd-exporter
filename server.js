@@ -36,8 +36,8 @@ const typo3CurrentStatus = new Prometheus.Gauge({
 });
 
 const typo3StatusCounter = new Prometheus.Counter({
-  name: 'typo3_current_status',
-  help: 'Current status of TYPO3 system',
+  name: 'typo3_status_counter',
+  help: 'Counter for number of status changes, timestamped',
   labelNames: ['service','status']
 });
 

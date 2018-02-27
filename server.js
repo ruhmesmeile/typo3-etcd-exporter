@@ -63,7 +63,9 @@ app.get('/metrics', (req, res) => {
 });
 
 REQUIRED_SERVICES.forEach(function (serviceName) {
-  etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, 'stopped', console.log);
+  etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, 'stopped', function (err, res) {
+    if (err) console.log(err);
+  });
 });
 
 var watcher;

@@ -12,10 +12,12 @@ const REQUIRED_SERVICES = process.env.TYPO3_REQUIRED_SERVICES.split(',');
 
 const STATUS = {
   'stopped': 0,
-  'installing': 1,
-  'installed': 2,
-  'starting': 3,
-  'started': 4
+  'deploying': 1,
+  'deployed': 2,
+  'installing': 3,
+  'installed': 4,
+  'starting': 5,
+  'started': 6
 }
 
 const express = require('express');

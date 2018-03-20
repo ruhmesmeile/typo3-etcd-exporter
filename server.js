@@ -68,7 +68,7 @@ REQUIRED_SERVICES.forEach(function (serviceName) {
   etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/current`, 'stopped', {
     prevExist: false
   }, function (err, res) {
-    err ? console.log(err) : etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/stopped`, (new Date()/1000), function (err, res) {
+    err ? console.log(err) : etcd.set(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/stopped`, function (err, res) {
       if (err) console.log(err);
     });
   });
@@ -85,7 +85,7 @@ SERVICES.forEach(function (serviceName) {
       typo3CurrentStatus.labels(serviceName).set(STATUS[getStatusName(currentStatus.node.value)]);
 
       etcd.get(`/ruhmesmeile/projects/typo3/${STAGE}/${PROJECTKEY}/status/${serviceName}/${getStatusName(currentStatus.node.value)}`, function (err, timestamp) {
-        err ? console.log(err) : typo3StatusCounter.labels(serviceName, getStatusName(currentStatus.node.value)).inc(1, new Date(timestamp.node.value*1000));
+        err ? console.log(err) : typo3StatusCounter.labels(serviceName, getStatusName(currentStatus.node.value)).inc(1);
       })
     }
   };
